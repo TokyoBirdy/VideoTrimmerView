@@ -1,19 +1,11 @@
 import UIKit
 
 class BottomViewController : UIViewController {
-    let trimmerViewController: TrimmerViewController
-
+    var trimmerViewController: TrimmerViewController!
     init() {
-        trimmerViewController = TrimmerViewController()
         super.init(nibName: nil, bundle: nil)
-
-        addChildViewController(trimmerViewController)
-        view.addSubview(trimmerViewController.view)
-        trimmerViewController.didMove(toParentViewController: self)
-        trimmerViewController.view.backgroundColor = UIColor.blue
-       setupConstraints()
     }
-    
+
     required init?(coder aDecoder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
@@ -30,5 +22,17 @@ class BottomViewController : UIViewController {
 
         ]
         NSLayoutConstraint.activate(constraints)
+    }
+
+    override func viewDidLoad() {
+        super.viewDidLoad()
+        trimmerViewController = TrimmerViewController()
+        addChildViewController(trimmerViewController)
+        view.addSubview(trimmerViewController.view)
+        trimmerViewController.didMove(toParentViewController: self)
+        trimmerViewController.view.backgroundColor = UIColor.blue
+        setupConstraints()
+        
+        
     }
 }

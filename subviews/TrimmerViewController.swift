@@ -2,18 +2,11 @@ import UIKit
 
 class TrimmerViewController: UIViewController {
 
-    let trimmerView: TrimmerView
-    
+    var trimmerView: TrimmerView!
 
     init() {
-        trimmerView = TrimmerView()
-        trimmerView.backgroundColor = UIColor.red
-
         super.init(nibName: nil, bundle: nil)
-        view.addSubview(trimmerView)
-        setupConstraints()
     }
-
     required init?(coder aDecoder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
@@ -28,6 +21,14 @@ class TrimmerViewController: UIViewController {
             ]
 
         NSLayoutConstraint.activate(constraints)
+    }
+    override func viewDidLoad() {
+        super.viewDidLoad()
+        trimmerView = TrimmerView()
+        trimmerView.backgroundColor = UIColor.red
+        view.addSubview(trimmerView)
+        setupConstraints()
+ 
     }
 
 

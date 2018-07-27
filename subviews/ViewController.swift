@@ -1,10 +1,12 @@
 import UIKit
 
 class ViewController: UIViewController {
-    let bottomViewController:BottomViewController!
+    var bottomViewController:BottomViewController!
 
     override func viewDidLoad() {
         super.viewDidLoad()
+        bottomViewController = BottomViewController()
+        bottomViewController.view.backgroundColor = UIColor.black
 
         addChildViewController(bottomViewController)
         view.addSubview(bottomViewController.view)
@@ -12,15 +14,7 @@ class ViewController: UIViewController {
         setupConstraints()
 
     }
-    
-    required init?(coder aDecoder: NSCoder) {
-        bottomViewController = BottomViewController()
-       super.init(coder: aDecoder)
 
-        bottomViewController.view.backgroundColor = UIColor.yellow
-
-
-    }
 
     func setupConstraints() {
         //So this is done in auto layout just only manully setup
