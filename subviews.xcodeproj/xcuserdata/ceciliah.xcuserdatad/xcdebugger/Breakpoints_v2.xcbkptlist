@@ -27,13 +27,13 @@
             shouldBeEnabled = "No"
             ignoreCount = "0"
             continueAfterRunningActions = "No"
-            filePath = "subviews/TrimmerView.swift"
-            timestampString = "554404097.932297"
+            filePath = "subviews/UIView+Recursive.swift"
+            timestampString = "554415849.879411"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "46"
-            endingLineNumber = "46"
-            landmarkName = "setupConstraints()"
+            startingLineNumber = "12"
+            endingLineNumber = "12"
+            landmarkName = "getAllSubviews(view:)"
             landmarkType = "7">
          </BreakpointContent>
       </BreakpointProxy>
@@ -43,13 +43,45 @@
             shouldBeEnabled = "No"
             ignoreCount = "0"
             continueAfterRunningActions = "No"
-            filePath = "subviews/UIView+Recursive.swift"
-            timestampString = "554404097.93296"
+            filePath = "subviews/TrimmerView.swift"
+            timestampString = "554415849.879493"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "12"
-            endingLineNumber = "12"
-            landmarkName = "getAllSubviews(view:)"
+            startingLineNumber = "133"
+            endingLineNumber = "133"
+            landmarkName = "moveOverlayView(_:)"
+            landmarkType = "7">
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            shouldBeEnabled = "No"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "subviews/Overlayview.swift"
+            timestampString = "554415849.879859"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "24"
+            endingLineNumber = "24"
+            landmarkName = "point(inside:)"
+            landmarkType = "7">
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            shouldBeEnabled = "Yes"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "subviews/TrimmerView.swift"
+            timestampString = "554415849.87992"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "144"
+            endingLineNumber = "144"
+            landmarkName = "moveOverlayView(_:)"
             landmarkType = "7">
          </BreakpointContent>
       </BreakpointProxy>

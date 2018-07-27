@@ -14,10 +14,10 @@ class TrimmerViewController: UIViewController {
     func setupConstraints() {
         trimmerView.translatesAutoresizingMaskIntoConstraints = false
         let constraints = [
-            trimmerView.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 8),
-            trimmerView.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -8),
-            trimmerView.heightAnchor.constraint(equalToConstant: 80),
-            trimmerView.bottomAnchor.constraint(equalTo: view.bottomAnchor, constant: -2),
+            trimmerView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
+            trimmerView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
+            trimmerView.heightAnchor.constraint(equalTo:view.heightAnchor),
+            trimmerView.bottomAnchor.constraint(equalTo: view.bottomAnchor),
             ]
 
         NSLayoutConstraint.activate(constraints)
