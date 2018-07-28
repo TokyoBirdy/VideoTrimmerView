@@ -6,9 +6,11 @@ class TrimmerView: UIView {
 
     let assetScrollView: AssetScrollView
     let leftOverlayView : OverlayView
-    let leftHandleView : HandleView
     let rightOverlayView : OverlayView
+
+    let leftHandleView : HandleView
     let rightHandleView : HandleView
+    let middleOverLayview: OverlayView
     var leftConstraint: NSLayoutConstraint!
     var rightConstraint: NSLayoutConstraint!
 
@@ -17,10 +19,12 @@ class TrimmerView: UIView {
     var rightStartingPoint: CGPoint = .zero
     var middleStartingPoint: CGPoint = .zero
 
-    var isDraggingLeftOverlay: Bool = false
-    var isDraggingRightOverlay: Bool = false
+    var isDraggingLeftHandle: Bool = false
+    var isDraggingRighthandle: Bool = false
     var isDraggingMiddleView: Bool = false
-    var trimLength: CGFloat = 100
+    var maxTrimLength: CGFloat = 200
+    var minTrimLength: CGFloat = 80
+    var trimLength : CGFloat = 100
 
     var leftConstraintMax: CGFloat = 0
     var rightConstraintMax: CGFloat = 0
@@ -28,25 +32,35 @@ class TrimmerView: UIView {
     override init(frame: CGRect) {
         assetScrollView = AssetScrollView(frame: .zero)
 
-        leftHandleView = HandleView(frame:.zero)
-        leftOverlayView = OverlayView(frame:.zero)
 
-        rightHandleView = HandleView(frame:.zero)
+        leftOverlayView = OverlayView(frame:.zero)
         rightOverlayView = OverlayView(frame:.zero)
+
+        leftHandleView = HandleView(frame:.zero)
+        rightHandleView = HandleView(frame:.zero)
+        middleOverLayview = OverlayView(frame:.zero)
 
         super.init(frame: frame)
 
-        assetScrollView.backgroundColor = UIColor.cyan
+        middleOverLayview.backgroundColor = UIColor(red: 255/255, green: 0/255, blue: 0/255, alpha: 0.1)
         addSubview(assetScrollView)
-        leftOverlayView.addSubview(leftHandleView)
-        rightOverlayView.addSubview(rightHandleView)
+
+        middleOverLayview.addSubview(leftHandleView)
+        middleOverLayview.addSubview(rightHandleView)
+
         addSubview(leftOverlayView)
+        addSubview(middleOverLayview)
         addSubview(rightOverlayView)
 
         setupConstraints()
+
+        leftOverlayView.isUserInteractionEnabled = false
+        rightOverlayView.isUserInteractionEnabled = false
+
         let panGestureRecognizer = UIPanGestureRecognizer(target: self, action: #selector(moveOverlayView(_:)))
-        assetScrollView.isUserInteractionEnabled = false
         self.addGestureRecognizer(panGestureRecognizer)
+
+        middleOverLayview.backgroundColor = UIColor.red.withAlphaComponent(0.7)
 
     }
 
@@ -57,8 +71,8 @@ class TrimmerView: UIView {
     func setupConstraints() {
         let allSubviews = self.getAllSubviews() as [UIView]
         allSubviews.forEach { $0.translatesAutoresizingMaskIntoConstraints = false}
-        leftConstraint = leftOverlayView.trailingAnchor.constraint(equalTo: leadingAnchor, constant: handleWidth)
-        rightConstraint = rightOverlayView.leadingAnchor.constraint(equalTo: trailingAnchor, constant: -handleWidth)
+        leftConstraint = leftOverlayView.trailingAnchor.constraint(equalTo: leadingAnchor)
+        rightConstraint = rightOverlayView.leadingAnchor.constraint(equalTo: leadingAnchor, constant: maxTrimLength)
 
         let constraints : [NSLayoutConstraint] = [
             assetScrollView.leadingAnchor.constraint(equalTo: leadingAnchor),
@@ -66,25 +80,30 @@ class TrimmerView: UIView {
             assetScrollView.heightAnchor.constraint(equalTo: heightAnchor),
             assetScrollView.bottomAnchor.constraint(equalTo: bottomAnchor),
 
-            leftHandleView.topAnchor.constraint(equalTo: topAnchor),
-            leftHandleView.trailingAnchor.constraint(equalTo:leftOverlayView.trailingAnchor),
-            leftHandleView.heightAnchor.constraint(equalTo:leftOverlayView.heightAnchor),
-            leftHandleView.widthAnchor.constraint(equalToConstant: handleWidth),
-
             leftOverlayView.topAnchor.constraint(equalTo: topAnchor),
             leftOverlayView.widthAnchor.constraint(equalTo: widthAnchor),
             leftOverlayView.heightAnchor.constraint(equalTo:heightAnchor),
             leftConstraint,
 
-            rightHandleView.topAnchor.constraint(equalTo: topAnchor),
-            rightHandleView.leadingAnchor.constraint(equalTo:rightOverlayView.leadingAnchor),
-            rightHandleView.heightAnchor.constraint(equalTo:rightOverlayView.heightAnchor),
-            rightHandleView.widthAnchor.constraint(equalToConstant: handleWidth),
-
             rightOverlayView.topAnchor.constraint(equalTo: topAnchor),
             rightOverlayView.widthAnchor.constraint(equalTo: widthAnchor),
             rightOverlayView.heightAnchor.constraint(equalTo:heightAnchor),
             rightConstraint,
+
+            middleOverLayview.topAnchor.constraint(equalTo: topAnchor),
+            middleOverLayview.heightAnchor.constraint(equalTo:heightAnchor),
+            middleOverLayview.leadingAnchor.constraint(equalTo: leftOverlayView.trailingAnchor),
+            middleOverLayview.trailingAnchor.constraint(equalTo: rightOverlayView.leadingAnchor),
+
+            leftHandleView.topAnchor.constraint(equalTo: middleOverLayview.topAnchor),
+            leftHandleView.leadingAnchor.constraint(equalTo:middleOverLayview.leadingAnchor),
+            leftHandleView.heightAnchor.constraint(equalTo:middleOverLayview.heightAnchor),
+            leftHandleView.widthAnchor.constraint(equalToConstant: handleWidth),
+
+            rightHandleView.topAnchor.constraint(equalTo: middleOverLayview.topAnchor),
+            rightHandleView.trailingAnchor.constraint(equalTo:middleOverLayview.trailingAnchor),
+            rightHandleView.heightAnchor.constraint(equalTo:rightOverlayView.heightAnchor),
+            rightHandleView.widthAnchor.constraint(equalToConstant: handleWidth),
             ]
 
         NSLayoutConstraint.activate(constraints)
@@ -93,62 +112,74 @@ class TrimmerView: UIView {
 
     @objc func moveOverlayView(_ geature: UIPanGestureRecognizer) {
 
-
         switch geature.state {
         case .began:
-            let isLeft = leftOverlayView.point(inside: geature.location(in: leftOverlayView))
-            let isRight = rightOverlayView.point(inside: geature.location(in: rightOverlayView))
-
+            let isLeft = leftHandleView.point(inside: geature.location(in: leftHandleView))
+            let isRight = rightHandleView.point(inside: geature.location(in: rightHandleView))
+          //  let isMiddle = middleOverLayview.point(inside: geature.location(in: middleOverLayview))
 
             let touchingPoint = geature.location(in: self)
 
             if (isLeft) {
                 leftStartingPoint = touchingPoint
-                isDraggingLeftOverlay = true
-                isDraggingRightOverlay = false
+                isDraggingLeftHandle = true
+                isDraggingRighthandle = false
                 isDraggingMiddleView = false
+                print("start left now")
 
             } else if (isRight) {
                 rightStartingPoint = touchingPoint
-                isDraggingLeftOverlay = false
-                isDraggingRightOverlay = true
+                isDraggingLeftHandle = false
+                isDraggingRighthandle = true
                 isDraggingMiddleView = false
+                print("start right now")
 
             } else {
                 middleStartingPoint = touchingPoint
-                isDraggingLeftOverlay = false
-                isDraggingRightOverlay = false
+                isDraggingLeftHandle = false
+                isDraggingRighthandle = false
                 isDraggingMiddleView = true
-                leftConstraintMax = maxConstraints()
-                rightConstraintMax = -maxConstraints()
+                print("start middle now")
 
             }
 
         case .changed:
            let touchingPoint = geature.location(in: self)
-           if (isDraggingLeftOverlay) {
+           if (isDraggingLeftHandle) {
             let deltaX = touchingPoint.x - self.leftStartingPoint.x
             leftConstraint.constant += deltaX
-            leftConstraint.constant = max(leftConstraint.constant, 10)
+            let rightEdgeMax = rightConstraint.constant - minTrimLength
+            let leftConstraintleftMax = rightConstraint.constant - maxTrimLength
+            leftConstraint.constant = min(rightEdgeMax, max(leftConstraint.constant, leftConstraintleftMax))
             self.leftStartingPoint = touchingPoint
             updateFilmLength()
+             print("change left now")
 
-           } else if (isDraggingRightOverlay) {
+
+           } else if (isDraggingRighthandle) {
             let deltaX = touchingPoint.x - self.rightStartingPoint.x
             rightConstraint.constant += deltaX
-            rightConstraint.constant = min(rightConstraint.constant, -10)
+            let leftEdgeMax = leftConstraint.constant + minTrimLength
+
+            let rightScrollMax = leftConstraint.constant + maxTrimLength
+            let rightEdgeMax = min(bounds.width, rightScrollMax)
+            rightConstraint.constant = min(max(leftEdgeMax, rightConstraint.constant), rightEdgeMax)
             self.rightStartingPoint = touchingPoint
             updateFilmLength()
+            print("change right now")
 
            } else {
             //assume dragging middle
             let deltaX = touchingPoint.x - self.middleStartingPoint.x
             leftConstraint.constant += deltaX
-            leftConstraint.constant = min(max(leftConstraint.constant, 10), leftConstraintMax)
+            let leftConstraintRightMax = bounds.width - trimLength
+            leftConstraint.constant = min(max(leftConstraint.constant, 0),leftConstraintRightMax)
             rightConstraint.constant += deltaX
-            rightConstraint.constant = min(max(rightConstraint.constant, rightConstraintMax), -10)
-
+            let rightConstraintlLeftMax = trimLength
+            let rightConstraintRightMax = bounds.width
+            rightConstraint.constant = min(max(rightConstraint.constant, rightConstraintlLeftMax), rightConstraintRightMax)
             self.middleStartingPoint = touchingPoint
+             print("change middle now")
             }
         case .ended:
             break
@@ -163,12 +194,13 @@ class TrimmerView: UIView {
 
 
     func updateFilmLength() {
-        trimLength = rightOverlayView.frame.minX - leftOverlayView.frame.maxX
-        print("trim length", trimLength)
+       // let length = rightOverlayView.frame.minX - leftOverlayView.frame.maxX
+        let anotherLength = rightConstraint.constant - leftConstraint.constant
+
+        trimLength = max(min(anotherLength, maxTrimLength), minTrimLength)
+       // print("trim length", trimLength)
     }
 
-    func maxConstraints() -> CGFloat {
-        return bounds.width - trimLength - handleWidth
-    }
+
 
 }

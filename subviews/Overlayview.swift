@@ -5,7 +5,7 @@ class OverlayView: UIView {
 
     override init(frame: CGRect) {
         super.init(frame: frame)
-        self.backgroundColor = UIColor.yellow
+        self.backgroundColor = UIColor.gray.withAlphaComponent(0.8)
     }
 
     required init?(coder aDecoder: NSCoder) {
@@ -18,12 +18,11 @@ class OverlayView: UIView {
 
     func point(inside point: CGPoint) -> Bool {
         let relativeFrame = self.bounds
-        let hitFrame = UIEdgeInsetsInsetRect(relativeFrame, UIEdgeInsetsMake(0, -30, 0, -30))
+        let hitFrame = UIEdgeInsetsInsetRect(relativeFrame, .zero)
         let result = hitFrame.contains(point)
         print("result is", result)
         return result
     }
-
 
 
 }
