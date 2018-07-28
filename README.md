@@ -2,4 +2,4 @@
 Scrollable view with stackview  as base
 Trim a video and update constraints
 
-![scrolling](https://github.com/TokyoBirdy/Scrollable-StackView/blob/master/scrollable%20stackview.gif)
+![Trimmer](https://github.com/TokyoBirdy/VideoTrimmerView/blob/master/trimmerview.gif)
