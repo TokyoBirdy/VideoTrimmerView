@@ -1,6 +1,7 @@
 import UIKit
 
 class HandleView: UIView {
+    var edgeInsets: UIEdgeInsets = .zero
     override init(frame: CGRect) {
         super.init(frame: frame)
         backgroundColor = UIColor.black
@@ -16,7 +17,7 @@ class HandleView: UIView {
 
     func point(inside point: CGPoint) -> Bool {
         let relativeFrame = self.bounds
-        let hitFrame = UIEdgeInsetsInsetRect(relativeFrame, UIEdgeInsetsMake(0, -30, 0, -30))
+        let hitFrame = UIEdgeInsetsInsetRect(relativeFrame, edgeInsets)
         let result = hitFrame.contains(point)
        // print("result is", result)
         return result

@@ -1,6 +1,27 @@
 import UIKit
 
+enum DragPosition {
+    case isDraggingLeftHandle(startingPoint: CGPoint)
+    case isDraggingRightHandle(startingPoint: CGPoint)
+    case isDragginTrimmerView(startingPoint: CGPoint)
+    case isNotValid
+
+    static func drag(view:TrimmerView, gesture: UIGestureRecognizer) -> DragPosition {
+        let startingPoint = gesture.location(in: view)
+        if (view.leftHandleView.point(inside: gesture.location(in: view.leftHandleView))) {
+            return .isDraggingLeftHandle(startingPoint: startingPoint)
+        } else if (view.rightHandleView.point(inside: gesture.location(in: view.rightHandleView))) {
+            return .isDraggingRightHandle(startingPoint: startingPoint)
+        } else if (view.middleOverLayview.point(inside: gesture.location(in: view.middleOverLayview))) {
+            return .isDragginTrimmerView(startingPoint: startingPoint)
+        } else {
+            return .isNotValid
+        }
+    }
+}
+
 class TrimmerView: UIView {
+    let handleTouchSpace : CGFloat = 40
 
     let handleWidth : CGFloat = 10.0
 
@@ -15,13 +36,8 @@ class TrimmerView: UIView {
     var rightConstraint: NSLayoutConstraint!
 
 
-    var leftStartingPoint: CGPoint = .zero
-    var rightStartingPoint: CGPoint = .zero
-    var middleStartingPoint: CGPoint = .zero
 
-    var isDraggingLeftHandle: Bool = false
-    var isDraggingRighthandle: Bool = false
-    var isDraggingMiddleView: Bool = false
+    var dragPosition: DragPosition = .isNotValid
     var maxTrimLength: CGFloat = 200
     var minTrimLength: CGFloat = 80
     var trimLength : CGFloat = 100
@@ -42,6 +58,9 @@ class TrimmerView: UIView {
 
         super.init(frame: frame)
 
+        middleOverLayview.edgeInsets = UIEdgeInsets(top: 0, left: -(handleTouchSpace / 2), bottom: 0, right: -(handleTouchSpace / 2))
+        leftHandleView.edgeInsets = UIEdgeInsets(top: 0, left: -(handleTouchSpace / 2), bottom: 0, right: -(handleTouchSpace / 2 - handleWidth) )
+        rightHandleView.edgeInsets = UIEdgeInsets(top: 0, left: -(handleTouchSpace / 2 - handleWidth), bottom: 0, right: -(handleTouchSpace / 2) )
         middleOverLayview.backgroundColor = UIColor(red: 255/255, green: 0/255, blue: 0/255, alpha: 0.1)
         addSubview(assetScrollView)
 
@@ -114,80 +133,44 @@ class TrimmerView: UIView {
 
         switch geature.state {
         case .began:
-            let isLeft = leftHandleView.point(inside: geature.location(in: leftHandleView))
-            let isRight = rightHandleView.point(inside: geature.location(in: rightHandleView))
-          //  let isMiddle = middleOverLayview.point(inside: geature.location(in: middleOverLayview))
-
-            let touchingPoint = geature.location(in: self)
-
-            if (isLeft) {
-                leftStartingPoint = touchingPoint
-                isDraggingLeftHandle = true
-                isDraggingRighthandle = false
-                isDraggingMiddleView = false
-                print("start left now")
-
-            } else if (isRight) {
-                rightStartingPoint = touchingPoint
-                isDraggingLeftHandle = false
-                isDraggingRighthandle = true
-                isDraggingMiddleView = false
-                print("start right now")
-
-            } else {
-                middleStartingPoint = touchingPoint
-                isDraggingLeftHandle = false
-                isDraggingRighthandle = false
-                isDraggingMiddleView = true
-                print("start middle now")
-
-            }
-
+            dragPosition = DragPosition.drag(view: self, gesture: geature)
         case .changed:
-           let touchingPoint = geature.location(in: self)
-           if (isDraggingLeftHandle) {
-            let deltaX = touchingPoint.x - self.leftStartingPoint.x
-            leftConstraint.constant += deltaX
-            let rightEdgeMax = rightConstraint.constant - minTrimLength
-            let leftConstraintleftMax = rightConstraint.constant - maxTrimLength
-            leftConstraint.constant = min(rightEdgeMax, max(leftConstraint.constant, leftConstraintleftMax))
-            self.leftStartingPoint = touchingPoint
-            updateFilmLength()
-             print("change left now")
+            let touchingPoint = geature.location(in: self)
+            switch dragPosition {
+            case .isDraggingLeftHandle(startingPoint: let startingPoint):
+                let deltaX = touchingPoint.x - startingPoint.x
+                leftConstraint.constant += deltaX
+                let rightEdgeMax = rightConstraint.constant - minTrimLength
+                let leftConstraintleftMax = rightConstraint.constant - maxTrimLength
+                leftConstraint.constant = min(rightEdgeMax, max(leftConstraint.constant, leftConstraintleftMax))
+                dragPosition = .isDraggingLeftHandle(startingPoint: touchingPoint)
+                updateFilmLength()
+                print("change left now")
+            case .isDraggingRightHandle(startingPoint: let startingPoint):
+                let deltaX = touchingPoint.x - startingPoint.x
+                rightConstraint.constant += deltaX
+                let leftEdgeMax = leftConstraint.constant + minTrimLength
 
-
-           } else if (isDraggingRighthandle) {
-            let deltaX = touchingPoint.x - self.rightStartingPoint.x
-            rightConstraint.constant += deltaX
-            let leftEdgeMax = leftConstraint.constant + minTrimLength
-
-            let rightScrollMax = leftConstraint.constant + maxTrimLength
-            let rightEdgeMax = min(bounds.width, rightScrollMax)
-            rightConstraint.constant = min(max(leftEdgeMax, rightConstraint.constant), rightEdgeMax)
-            self.rightStartingPoint = touchingPoint
-            updateFilmLength()
-            print("change right now")
-
-           } else {
-            //assume dragging middle
-            let deltaX = touchingPoint.x - self.middleStartingPoint.x
-            leftConstraint.constant += deltaX
-            let leftConstraintRightMax = bounds.width - trimLength
-            leftConstraint.constant = min(max(leftConstraint.constant, 0),leftConstraintRightMax)
-            rightConstraint.constant += deltaX
-            let rightConstraintlLeftMax = trimLength
-            let rightConstraintRightMax = bounds.width
-            rightConstraint.constant = min(max(rightConstraint.constant, rightConstraintlLeftMax), rightConstraintRightMax)
-            self.middleStartingPoint = touchingPoint
-             print("change middle now")
+                let rightScrollMax = leftConstraint.constant + maxTrimLength
+                let rightEdgeMax = min(bounds.width, rightScrollMax)
+                rightConstraint.constant = min(max(leftEdgeMax, rightConstraint.constant), rightEdgeMax)
+                dragPosition = .isDraggingRightHandle(startingPoint: touchingPoint)
+                updateFilmLength()
+                print("change right now")
+            case .isDragginTrimmerView(startingPoint: let startingPoint):
+                let deltaX = touchingPoint.x - startingPoint.x
+                leftConstraint.constant += deltaX
+                let leftConstraintRightMax = bounds.width - trimLength
+                leftConstraint.constant = min(max(leftConstraint.constant, 0),leftConstraintRightMax)
+                rightConstraint.constant += deltaX
+                let rightConstraintlLeftMax = trimLength
+                let rightConstraintRightMax = bounds.width
+                rightConstraint.constant = min(max(rightConstraint.constant, rightConstraintlLeftMax), rightConstraintRightMax)
+                dragPosition = .isDragginTrimmerView(startingPoint: touchingPoint)
+                print("change middle now")
+            case .isNotValid: break
             }
-        case .ended:
-            break
-        case .cancelled:
-            break
-        case .failed:
-            break
-        case .possible:
+        case .ended, .cancelled, .failed, .possible:
             break
         }
     }
